@@ -18,7 +18,6 @@ try:
     maxthreads = max([int(x) for x in re.findall(r'\d+', subprocess.check_output(["sinfo", "-O", "cpus"]).decode())])
 except FileNotFoundError:
     maxthreads = int(subprocess.check_output("nproc").decode())
-os.path.
 
 # find the PacBio RSII movie files
 rs2_runs = [r.split(os.path.sep)[1] for r in glob("rawdata/pb_*")]
@@ -46,9 +45,7 @@ rule bax2bam:
         temp("process/{seqrun}_{movie}.scraps.bam"),
         temp("process/{seqrun}_{movie}.scraps.bam.pbi")
     input:
-        lambda wildcards: glob("rawdata/{wildcards.seqrun}/**/{wildcards.movie}.*.bax.h5"
-                               .format(wildcards = wildcards),
-                               recursive = True)
+        lambda wildcards: glob(f"rawdata/{wildcards.seqrun}/**/{wildcards.movie}.*.bax.h5", recursive = True)
     shadow: "shallow"
     params:
         prefix="process/{seqrun}_{movie}"
