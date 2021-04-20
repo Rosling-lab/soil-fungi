@@ -91,7 +91,9 @@ wildcard_constraints:
 
 # generate circular consensus sequences from subreads
 rule ccs:
-    output: "process/{seqrun}_{movie}.ccs.bam"
+    output:
+        bam = "process/{seqrun}_{movie}.ccs.bam",
+        index = "process/{seqrun}_{movie}.ccs.bam.pbi"
     input: "process/{seqrun}_{movie}.subreads.bam"
     resources:
         walltime=120
@@ -102,7 +104,7 @@ rule ccs:
     envmodules:
         "bioinfo-tools",
         "SMRT/5.0.1" # ccs from newer versions doesn't accept RSII data
-    shell: "ccs --numThreads {threads} --richQVs {input} {output} &>{log}"
+    shell: "ccs --numThreads {threads} --richQVs {input} {output.bam} &>{log}"
 
 # convert a ccs BAM to a fastq
 # this loses a lot of PacBio-specific information, but it is useful for other software.
