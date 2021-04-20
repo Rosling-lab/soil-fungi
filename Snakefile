@@ -107,19 +107,21 @@ rule ccs:
 # convert a ccs BAM to a fastq
 # this loses a lot of PacBio-specific information, but it is useful for other software.
 rule bam2fastq:
-    output: temp("process/{name}.fastq.gz")
+    output: temp("process/{seqrun}_{movie}.ccs.fastq.gz")
     input:
-        bam = "process/{name}.bam",
-        pbi = "process/{name}.bam.pbi"
+        bam = "process/{seqrun}_{movie}.ccs.bam",
+        pbi = "process/{seqrun}_{movie}.ccs.bam.pbi"
+    params:
+        basename = "process/{seqrun}_{movie}.ccs"
     resources:
              walltime=10
     threads: 1
-    log: "logs/bam2fastq_{name}.log"
+    log: "logs/bam2fastq_{seqrun}_{movie}.ccs.log"
     conda: "conda/pacbio.yaml"
     envmodules:
         "bioinfo-tools",
         "SMRT/7.0.1"
-    shell: "bam2fastq -o process/{wildcards.name} {input.bam} &>{log}"
+    shell: "bam2fastq -o process/{params.basename} {input.bam} &>{log}"
 
 # lima doesn't store any information about orientation when run on subreads,
 # so orient using the primers
