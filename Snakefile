@@ -124,7 +124,7 @@ rule bam2fastq:
     envmodules:
         "bioinfo-tools",
         "SMRT/7.0.1"
-    shell: "bam2fastq -o process/{params.basename} {input.bam} &>{log}"
+    shell: "bam2fastq -o {params.basename} {input.bam} &>{log}"
 
 # lima doesn't store any information about orientation when run on subreads,
 # so orient using the primers
