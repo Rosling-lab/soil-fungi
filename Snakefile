@@ -26,8 +26,9 @@ movies = {r:[os.path.basename(m)[:-7] for m in glob(f"rawdata/{r}/**/*.bas.h5", 
 
 
 # figure out how to distribute the movie files equally over the cores we have available.
-moviejobs = gcd(maxthreads, sum([len(m) for m in movies]))
-moviethreads = maxthreads/moviejobs
+nmovies = sum([len(m) for m in movies.values()])
+moviejobs = gcd(maxthreads, nmovies)
+moviethreads = maxthreads//moviejobs
 
 # create the log directory if needed
 if not os.path.exists("logs"):
