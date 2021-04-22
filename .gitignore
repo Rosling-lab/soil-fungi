@@ -1,4 +1,7 @@
+*.Rproj
+.Rproj.user
 .snakemake
+.idea
 rawdata
 process
 logs
