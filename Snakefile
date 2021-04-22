@@ -35,7 +35,11 @@ if not os.path.exists("logs"):
     os.mkdir("logs")
 
 rule all:
-    input: expand("process/{seqrun}.ccs.trimmed.fastq.gz", seqrun = rs2_runs)
+    input:
+        expand("process/{seqrun}.ccs.trimmed.fastq.gz", seqrun = rs2_runs),
+        "_targets.R",
+        grob("scripts/*.R")
+    shell: "R -e 'targets::tar_make()'"
 
 # convert a raw RSII-format (.h5) movie to the Sequel format (.bam)
 # these files are pretty large, so they are marked as temporary.

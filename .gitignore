@@ -2,6 +2,7 @@
 .Rproj.user
 .snakemake
 .idea
+_targets
 rawdata
 process
 logs
