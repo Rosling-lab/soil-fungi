@@ -6,7 +6,7 @@
 #SBATCH -A snic2020-5-142
 #SBATCH -p node
 #SBATCH -N 1
-#SBATCH -t 0-04:00:00
+#SBATCH -t 0-24:00:00
 #SBATCH -J soil-fungi
 #SBATCH -C usage_mail
 #SBATCH -M rackham
