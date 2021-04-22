@@ -38,7 +38,9 @@ rule all:
     input:
         expand("process/{seqrun}.ccs.trimmed.fastq.gz", seqrun = rs2_runs),
         "_targets.R",
-        grob("scripts/*.R")
+        glob("scripts/*.R")
+    output: touch(".finished")
+    conda: "conda/soil-fungi.yaml"
     shell: "R -e 'targets::tar_make()'"
 
 # convert a raw RSII-format (.h5) movie to the Sequel format (.bam)

@@ -3,6 +3,7 @@ channels:
   - bioconda
   - conda-forge
   - defaults
+  - bfurneaux
 dependencies:
   - r-base=4.0
   # workflow
@@ -12,7 +13,7 @@ dependencies:
   - r-fst=0.9.4
   # bioinformatics
   - bioconductor-dada2=1.18.0
-  - r-lsux0.99.6
+  - r-lsux=0.99.6
   - r-tzara=0.0.11
   - r-phylotax=0.0.4
   - vsearch=2.15.1
