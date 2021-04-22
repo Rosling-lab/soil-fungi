@@ -3,6 +3,15 @@
 # Brendan Furneaux
 # April 2021
 
+library(targets)
+library(magrittr)
+
+# options for targets
+tar_option_set(
+    format = "qs", # default format qs: smaller and faster than default rds
+    error = "continue" # if there is an error, keep trying other targets
+)
+
 # define necessary functions
 source("scripts/00_functions.R")
 # load configuration files

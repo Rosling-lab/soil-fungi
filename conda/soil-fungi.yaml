@@ -8,6 +8,8 @@ dependencies:
   # workflow
   - r-targets=0.3.1
   - r-tarchetypes=0.1.1
+  - r-qs=0.23.6
+  - r-fst=0.9.4
   # bioinformatics
   - bioconductor-dada2=1.18.0
   - r-lsux0.99.6
