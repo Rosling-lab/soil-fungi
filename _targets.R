@@ -4,6 +4,7 @@
 # April 2021
 
 library(targets)
+library(tarchetypes)
 library(magrittr)
 
 # options for targets
