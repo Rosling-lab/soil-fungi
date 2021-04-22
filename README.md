@@ -20,18 +20,15 @@ This repository hosts a generic pipeline to make ASVs from raw PacBio reads.
   sbatch run-node.sh
   ```
 
-### Currently included steps
+### Pipeline steps
 
-* Run improved CCS on RSII reads.
-* Orient reads and trim primers (ITS1 and LR5).
-* Filter: min length 1000 bp, max length 2000 bp, max 1% expected errors.
-
-### Coming soon
-
-* Demultiplexing
-* Different primer pairs
-* Different filter criteria
-* Generate consensus ASVs with LSUx + dada2 + Tzara
-* Assign taxonomy with Silva/RDP/Unite
-* Generate a tree
-* Refine taxonomy with PHYLOTAX
+- [X] Run improved CCS on RSII reads.
+- [ ] Demultiplexing
+- [X] Orient reads and trim primers (ITS1 and LR5).
+      - [ ] Option for different primer pairs.
+- [X] Filter: min length 1000 bp, max length 2000 bp, max 1% expected errors.
+      - [ ] Option for different filter criteria.
+- [ ] Generate consensus ASVs with LSUx + dada2 + Tzara
+- [ ] Assign taxonomy with Silva/RDP/Unite
+- [ ] Generate a tree
+- [ ] Refine taxonomy with PHYLOTAX
