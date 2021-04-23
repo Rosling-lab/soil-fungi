@@ -12,7 +12,7 @@ regions_meta <- tibble::tribble(
     "LSU2",     "LSU2",            "LSU2",
     "D2",       "V3",              "V3",
     "LSU3",     "LSU3",            "LSU3",
-    "D3",       "D3",              "D3",
+    "D3",       "V4",              "V4",
     "LSU4",     "LSU4",            "LSU4"
 )
 
