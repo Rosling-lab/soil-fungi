@@ -43,7 +43,7 @@ rule all:
     conda: "conda/soil-fungi.yaml"
     shell:
         """
-        R -e 'targets::tar_make(); stopifnot(all(is.na(targets::tar_meta()$error)))"
+        R -e 'targets::tar_make(); stopifnot(all(is.na(targets::tar_meta()$error)))'
         """
 
 # convert a raw RSII-format (.h5) movie to the Sequel format (.bam)
