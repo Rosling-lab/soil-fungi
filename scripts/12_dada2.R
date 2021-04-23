@@ -3,7 +3,7 @@
 # April 2021
 
 regions_meta <- tibble::tribble(
-    ~region,    ~start_region,     ~end_region,
+    ~region_name,    ~start_region,     ~end_region,
     "ITS1",     "ITS1",            "ITS1",
     "5_8S",     "5_8S",            "5_8S",
     "ITS2",     "ITS2",            "ITS2",
@@ -19,7 +19,7 @@ regions_meta <- tibble::tribble(
 dada2_targets <- c(
     tar_map(
         values = regions_meta,
-        names = region,
+        names = region_name,
         tar_fst_tbl(
             extracted,
             tzara::extract_region(
@@ -32,15 +32,15 @@ dada2_targets <- c(
             iteration = "list"
         ),
         tar_target(
-            derep,
+            dereplicated,
             derep(extracted, qualityType = "FastqQuality", verbose = TRUE),
             pattern = map(extracted),
             iteration = "list"
         ),
         tar_target(
-            dada,
+            dadaobj,
             dada2::dada(
-                derep,
+                dereplicated,
                 err,
                 errorEstimationFunction = dada2::PacBioErrfun(),
                 multithread = local_cpus(),
@@ -55,13 +55,13 @@ dada2_targets <- c(
                 # increase the band size
                 BAND_SIZE = 64
             ),
-            pattern = map(derep, err),
+            pattern = map(dereplicated, err),
             iteration = "list"
         ),
         tar_fst_tbl(
-            dadamap,
-            tzara::dadamap(derep, dada, trimmed_files),
-            pattern = map(derep, dada, trimmed_files),
+            dadamapping,
+            tzara::dadamap(dereplicated, dadaobj, trimmed_files),
+            pattern = map(dereplicated, dadaobj, trimmed_files),
             iteration = "list"
         )
     ),
@@ -69,7 +69,7 @@ dada2_targets <- c(
         err = tar_target(
             err,
             dada2::learnErrors(
-                derep_5_8S,
+                dereplicated_5_8S,
                 errorEstimationFunction = dada2::PacBioErrfun(),
                 multithread = local_cpus(),
                 verbose = TRUE,
@@ -83,7 +83,7 @@ dada2_targets <- c(
                 # increase the band size
                 BAND_SIZE = 64
             ),
-            pattern = map(derep_5_8S),
+            pattern = map(dereplicated_5_8S),
             iteration = "list"
         )
     )
