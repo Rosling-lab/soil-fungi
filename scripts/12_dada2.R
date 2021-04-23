@@ -42,7 +42,16 @@ dada2_targets <- c(
                 err,
                 errorEstimationFunction = dada2::PacBioErrfun(),
                 multithread = local_cpus(),
-                verbose = TRUE
+                verbose = TRUE,
+                DETECT_SINGLETONS = TRUE,
+                # use alignment scores as used internally in PacBio software
+                MATCH = 1,
+                MISMATCH = -2,
+                GAP_PENALTY = -2,
+                # reduce the homopolymer gap penalty
+                HOMOPOLYMER_GAP_PENALTY = -1,
+                # increase the band size
+                BAND_SIZE = 64
             ),
             pattern = map(derep, err)
         ),
@@ -59,7 +68,16 @@ dada2_targets <- c(
                 derep_5_8S,
                 errorEstimationFunction = dada2::PacBioErrfun(),
                 multithread = local_cpus(),
-                verbose = TRUE
+                verbose = TRUE,
+                DETECT_SINGLETONS = TRUE,
+                # use alignment scores as used internally in PacBio software
+                MATCH = 1,
+                MISMATCH = -2,
+                GAP_PENALTY = -2,
+                # reduce the homopolymer gap penalty
+                HOMOPOLYMER_GAP_PENALTY = -1,
+                # increase the band size
+                BASD_SIZE = 64
             ),
             pattern = map(derep_5_8S)
         )
