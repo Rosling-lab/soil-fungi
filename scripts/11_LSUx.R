@@ -37,6 +37,7 @@ lsux_targets <- list(
             mxsize = 2048
         ) %>%
             tibble::add_column(file = trimmed_files),
-        pattern = map(trimmed_files)
+        pattern = map(trimmed_files),
+        iteration = "list"
     )
 )
