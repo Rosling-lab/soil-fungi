@@ -41,7 +41,10 @@ rule all:
         glob("scripts/*.R")
     output: touch(".finished")
     conda: "conda/soil-fungi.yaml"
-    shell: "R -e 'targets::tar_make()'"
+    shell:
+        """
+        R -e 'targets::tar_make(); stopifnot(all(is.na(targets::tar_meta()$error)))"
+        """
 
 # convert a raw RSII-format (.h5) movie to the Sequel format (.bam)
 # these files are pretty large, so they are marked as temporary.
