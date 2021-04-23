@@ -44,6 +44,6 @@ derep.QualityScaledXStringSet <- function(reads, n = 1e+06, verbose = FALSE, qua
     if (length(reads) == 0) return(NULL)
     fname <- tempfile("reads", fileext = ".fastq.gz")
     on.exit(unlink(fname))
-    Biostrings::writeQualityScaledXStringSet(reads, fname, compress = TRUE, qualityType = qualityType)
+    Biostrings::writeQualityScaledXStringSet(reads, fname, compress = TRUE)
     dada2::derepFastq(fname, n = n, verbose = verbose, qualityType = qualityType)
 }
