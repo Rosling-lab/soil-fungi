@@ -13,7 +13,8 @@ regions_meta <- tibble::tribble(
     "D2",       "V3",              "V3",
     "LSU3",     "LSU3",            "LSU3",
     "D3",       "V4",              "V4",
-    "LSU4",     "LSU4",            "LSU4"
+    "LSU4",     "LSU4",            "LSU4",
+    "full",     "full",            "full"
 )
 
 dada2_targets <- c(
@@ -69,10 +70,11 @@ dada2_targets <- c(
         err = tar_target(
             err,
             dada2::learnErrors(
-                dereplicated_5_8S,
+                dereplicated_full,
                 errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,
+                MAX_CONSIST = 50,
                 DETECT_SINGLETONS = TRUE,
                 # use alignment scores as used internally in PacBio software
                 MATCH = 1,
@@ -83,7 +85,7 @@ dada2_targets <- c(
                 # increase the band size
                 BAND_SIZE = 64
             ),
-            pattern = map(dereplicated_5_8S),
+            pattern = map(dereplicated_full),
             iteration = "list"
         )
     )
