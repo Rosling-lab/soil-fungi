@@ -25,7 +25,8 @@ dada2_targets <- c(
             tzara::extract_region(
                 seq = trimmed_files,
                 positions = positions,
-                region = r
+                region = start_region,
+                region2 = end_region
             ),
             pattern = map(trimmed_files, positions)
         ),
