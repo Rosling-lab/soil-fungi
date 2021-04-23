@@ -20,7 +20,7 @@ dada2_targets <- c(
     tar_map(
         values = regions_meta,
         names = region_name,
-        tar_fst_tbl(
+        tar_target(
             extracted,
             tzara::extract_region(
                 seq = trimmed_files,
