@@ -30,7 +30,7 @@ This repository hosts a generic pipeline to make ASVs from raw PacBio reads.
   - [ ] Option for different filter criteria.
 - [ ] Generate consensus ASVs with LSUx + dada2 + Tzara
   - [X] LSUx
-  - [ ] dada2
+  - [X] dada2
   - [ ] Tzara
 - [ ] Assign taxonomy with Silva/RDP/Unite
 - [ ] Generate a tree

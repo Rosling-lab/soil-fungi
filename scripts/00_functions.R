@@ -24,3 +24,26 @@ local_cpus <- function() {
         max(parallel::detectCores() - 1, 1)
     }
 }
+
+#### dada2 functions ####
+
+# call dada2::derepFastq() on an R object containing sequences instead of a file.
+derep <- function(reads, n, verbose, qualityType) {
+    UseMethod("derep")
+}
+
+derep.ShortReadQ <- function(reads, n = 1e+06, verbose = FALSE, qualityType = "Auto") {
+    if (length(reads) == 0) return(NULL)
+    fname <- tempfile("reads", fileext = ".fastq.gz")
+    on.exit(unlink(fname))
+    ShortRead::writeFastq(reads, fname, compress = TRUE, qualityType = qualityType)
+    dada2::derepFastq(fname, n = n, verbose = verbose, qualityType = qualityType)
+}
+
+derep.QualityScaledXStringSet <- function(reads, n = 1e+06, verbose = FALSE, qualityType = "Auto") {
+    if (length(reads) == 0) return(NULL)
+    fname <- tempfile("reads", fileext = ".fastq.gz")
+    on.exit(unlink(fname))
+    Biostrings::writeQualityScaledXStringSet(reads, fname, compress = TRUE, qualityType = qualityType)
+    dada2::derepFastq(fname, n = n, verbose = verbose, qualityType = qualityType)
+}
