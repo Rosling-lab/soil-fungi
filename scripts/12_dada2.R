@@ -75,7 +75,7 @@ dada2_targets <- c(
                 multithread = local_cpus(),
                 verbose = TRUE,
                 MAX_CONSIST = 50,
-                DETECT_SINGLETONS = TRUE,
+                DETECT_SINGLETONS = FALSE,
                 # use alignment scores as used internally in PacBio software
                 MATCH = 1,
                 MISMATCH = -2,
