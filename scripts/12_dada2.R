@@ -43,7 +43,7 @@ dada2_targets <- c(
             dada2::dada(
                 dereplicated,
                 err,
-                errorEstimationFunction = dada2::PacBioErrfun(),
+                errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,
                 DETECT_SINGLETONS = TRUE,
