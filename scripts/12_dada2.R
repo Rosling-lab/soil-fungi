@@ -31,7 +31,7 @@ dada2_targets <- c(
                 outfile <- file.path(outdir, basename(extracted))
                 dada2::filterAndTrim(
                     extracted,
-                    filt = outdir,
+                    filt = outfile,
                     truncQ = 0,
                     maxLen = max_length,
                     minLen = min_length,
@@ -75,7 +75,7 @@ dada2_targets <- c(
         ),
         tar_fst_tbl(
             dadamapping,
-            tzara::dadamap(dereplicated, dadaobj, trimmed_files)
+            tzara::dadamap(dereplicated, dadaobj, filtered)
         )
     ),
     list(
