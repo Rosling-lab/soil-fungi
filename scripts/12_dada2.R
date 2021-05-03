@@ -53,9 +53,11 @@ dada2_targets <- c(
         ),
         tar_target(
             dadaobj,
-            dada2::dada(
+            do_dada(
                 dereplicated,
                 err,
+                region = region_name,
+                err_region = "full",
                 errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,
@@ -79,8 +81,10 @@ dada2_targets <- c(
     list(
         err = tar_target(
             err,
-            dada2::learnErrors(
+            dada2::dada(
                 dereplicated_full,
+                err = NULL,
+                selfConsist = TRUE,
                 errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,

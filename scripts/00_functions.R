@@ -47,3 +47,12 @@ derep.QualityScaledXStringSet <- function(reads, n = 1e+06, verbose = FALSE, qua
     Biostrings::writeQualityScaledXStringSet(reads, fname, compress = TRUE)
     dada2::derepFastq(fname, n = n, verbose = verbose, qualityType = qualityType)
 }
+
+do_dada <- function(derep, err, region, err_region, ...) {
+    if (methods::is(err, "dada")) {
+        if (region == err_region) {
+            return(err)
+        }
+    }
+    dada2::dada(derep, err, ...)
+}
