@@ -7,7 +7,7 @@ regions_meta <- readr::read_csv(file.path(configdir, "default.regions.csv"))
 
 seqruns <- list.dirs("process", recursive = FALSE, full.names = FALSE)
 
-config_targets <- list{
+config_targets <- list(
     # get the path for the CM which is truncated at the LR5 primer site
     # (included in LSUx)
     cm_32S_trunc = tar_file(
@@ -17,4 +17,4 @@ config_targets <- list{
             package = "LSUx"
         )
     )
-}
+)
