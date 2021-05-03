@@ -30,9 +30,12 @@ nmovies = sum([len(m) for m in movies.values()])
 moviejobs = gcd(maxthreads, nmovies)
 moviethreads = maxthreads//moviejobs
 
-# create the log directory if needed
+# create the log directories if needed
 if not os.path.exists("logs"):
     os.mkdir("logs")
+for r in rs2_runs:
+    if not os.path.exists(f'logs/{r}'):
+        os.mkdir(f'logs/{r}')
 
 rule all:
     input:
@@ -62,7 +65,7 @@ rule bax2bam:
     resources:
         walltime=20
     threads: 2
-    log: "logs/bax2bam_{seqrun}_{movie}.log"
+    log: "logs/{seqrun}/bax2bam_{movie}.log"
     conda: "conda/pacbio.yaml"
     envmodules:
         "bioinfo-tools",
@@ -90,7 +93,7 @@ rule mergebam:
     shadow: "shallow"
     resources:
         walltime=20
-    log: "logs/mergebam_{seqrun}.log"
+    log: "logs/{seqrun}/mergebam.log"
     conda: "conda/samtools.yaml"
     envmodules:
         "bioinfo-tools",
@@ -114,7 +117,7 @@ rule ccs:
         walltime=120
     shadow: "shallow"
     threads: moviethreads
-    log: "logs/ccs_{seqrun}_{movie}.log"
+    log: "logs/{seqrun}/ccs_{movie}.log"
     conda: "conda/pacbio.yaml"
     envmodules:
         "bioinfo-tools",
@@ -137,7 +140,7 @@ rule bam2fastq:
     resources:
              walltime=10
     threads: 1
-    log: "logs/bam2fastq_{seqrun}_{movie}.ccs.log"
+    log: "logs/{seqrun}/bam2fastq_{movie}.ccs.log"
     conda: "conda/pacbio.yaml"
     envmodules:
         "bioinfo-tools",
@@ -156,7 +159,7 @@ rule orient:
         orientdir = "process/{seqrun}/orient",
         noprimerdir = "process/{seqrun}/lost/noprimer"
     threads: moviethreads
-    log: "logs/orient_{seqrun}_{movie}.log"
+    log: "logs/{seqrun}/orient_{movie}.log"
     conda: "conda/orient.yaml"
     shell:
         """
