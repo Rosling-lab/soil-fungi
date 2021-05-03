@@ -3,10 +3,10 @@
 # runs pacbio RSII demultiplexing and base calling on a
 # single node
 
-#SBATCH -A snic2020-5-142
+#SBATCH -A snic2021-5-44
 #SBATCH -p node
 #SBATCH -N 1
-#SBATCH -t 0-24:00:00
+#SBATCH -t 4-00:00:00
 #SBATCH -J soil-fungi
 #SBATCH -C usage_mail
 #SBATCH -M rackham
