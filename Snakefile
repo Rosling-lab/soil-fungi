@@ -36,7 +36,7 @@ if not os.path.exists("logs"):
 
 rule all:
     input:
-        expand("process/{seqrun}.ccs.trimmed.fastq.gz", seqrun = rs2_runs),
+        expand("process/{seqrun}/trimmed/{seqrun}.fastq.gz", seqrun = rs2_runs),
         "_targets.R",
         glob("scripts/*.R")
     output: touch(".finished")
@@ -50,15 +50,16 @@ rule all:
 # these files are pretty large, so they are marked as temporary.
 rule bax2bam:
     output:
-        temp("process/{seqrun}_{movie}.subreads.bam"),
-        temp("process/{seqrun}_{movie}.subreads.bam.pbi"),
-        temp("process/{seqrun}_{movie}.scraps.bam"),
-        temp("process/{seqrun}_{movie}.scraps.bam.pbi")
+        temp("process/{seqrun}/rawmovie/{movie}.subreads.bam"),
+        temp("process/{seqrun}/rawmovie/{movie}.subreads.bam.pbi"),
+        temp("process/{seqrun}/rawmovie/{movie}.scraps.bam"),
+        temp("process/{seqrun}/rawmovie/{movie}.scraps.bam.pbi")
     input:
         lambda wildcards: glob(f"rawdata/{wildcards.seqrun}/**/{wildcards.movie}.*.bax.h5", recursive = True)
     shadow: "shallow"
     params:
-        prefix="process/{seqrun}_{movie}"
+        prefix="process/{seqrun}/rawmovie/{movie}",
+        dir = "process/{seqrun}/rawmovie/"
     resources:
         walltime=20
     threads: 2
@@ -67,12 +68,16 @@ rule bax2bam:
     envmodules:
         "bioinfo-tools",
         "SMRT/5.0.1" # no bax2bam in newer versions
-    shell: "bax2bam {input} -o {params.prefix} &> {log}"
+    shell:
+        """
+        [ -d {params.dir} ] || mkdir -p {params.dir}
+        bax2bam {input} -o {params.prefix} &> {log}
+        """
 
 # endpoint target: convert all pacbio movies to Sequel format
 rule convertmovies:
     input:
-        [expand("process/{seqrun}_{movie}.{type}.bam",
+        [expand("process/{seqrun}/rawmovie/{movie}.{type}.bam",
                seqrun = s,
                movie = m,
                type = ['subreads', 'scraps'])
@@ -80,9 +85,9 @@ rule convertmovies:
 
 # merge all the movies which belong to the same plate
 rule mergebam:
-    output: temp("process/{seqrun}.subreads.bam")
+    output: temp("process/{seqrun}/rawmovie/{seqrun}.subreads.bam")
     input:
-        lambda wildcards: expand("process/{m}.subreads.bam", m = movies[wildcards.seqrun])
+        lambda wildcards: expand("process/{{seqrun}}/rawmovie/{m}.subreads.bam", m = movies[wildcards.seqrun])
     shadow: "shallow"
     resources:
         walltime=20
@@ -102,9 +107,10 @@ wildcard_constraints:
 # generate circular consensus sequences from subreads
 rule ccs:
     output:
-        bam = "process/{seqrun}_{movie}.ccs.bam",
-        index = "process/{seqrun}_{movie}.ccs.bam.pbi"
-    input: "process/{seqrun}_{movie}.subreads.bam"
+        bam = "process/{seqrun}/ccs/{movie}.bam",
+        index = "process/{seqrun}/ccs/{movie}.bam.pbi"
+    input: "process/{seqrun}/rawmovie/{movie}.subreads.bam"
+    params: dir = "process/{seqrun}/ccs"
     resources:
         walltime=120
     shadow: "shallow"
@@ -114,17 +120,21 @@ rule ccs:
     envmodules:
         "bioinfo-tools",
         "SMRT/5.0.1" # ccs from newer versions doesn't accept RSII data
-    shell: "ccs --numThreads {threads} --richQVs {input} {output.bam} &>{log}"
+    shell:
+        """
+        [ -d {params.dir} ] || mkdir -p {params.dir}
+        ccs --numThreads {threads} --richQVs {input} {output.bam} &>{log}
+        """
 
 # convert a ccs BAM to a fastq
 # this loses a lot of PacBio-specific information, but it is useful for other software.
 rule bam2fastq:
-    output: temp("process/{seqrun}_{movie}.ccs.fastq.gz")
+    output: temp("process/{seqrun}/ccs/{movie}.fastq.gz")
     input:
-        bam = "process/{seqrun}_{movie}.ccs.bam",
-        pbi = "process/{seqrun}_{movie}.ccs.bam.pbi"
+        bam = "process/{seqrun}/ccs/{movie}.bam",
+        pbi = "process/{seqrun}/ccs/{movie}.bam.pbi"
     params:
-        basename = "process/{seqrun}_{movie}.ccs"
+        basename = "process/{seqrun}/ccs/{movie}"
     resources:
              walltime=10
     threads: 1
@@ -139,15 +149,20 @@ rule bam2fastq:
 # so orient using the primers
 rule orient:
     output:
-        orient = "process/{seqrun}_{movie}.ccs.orient.fastq.gz",
-        noprimer = "process/{seqrun}_{movie}.ccs.noprimer.fastq.gz"
+        orient = "process/{seqrun}/orient/{movie}.fastq.gz",
+        noprimer = "process/{seqrun}/lost/noprimer/{movie}.fastq.gz"
     input:
-        ccs = "process/{seqrun}_{movie}.ccs.fastq.gz"
+        ccs = "process/{seqrun}/ccs/{movie}.fastq.gz"
+    params:
+        orientdir = "process/{seqrun}/orient",
+        noprimerdir = "process/{seqrun}/lost/noprimer"
     threads: moviethreads
     log: "logs/orient_{seqrun}_{movie}.log"
     conda: "conda/orient.yaml"
     shell:
         """
+        [ -d {params.orientdir} ] || mkdir -p {params.orientdir}
+        [ -d {params.noprimerdir} ] || mkdir -p {params.noprimerdir}
         cutadapt\\
             -a "TCCGTAGGTGAACCTGC;e=0.15...CGAAGTTTCCCTCAGGA;required;e=0.15"\\
             --action=none\\
@@ -155,7 +170,7 @@ rule orient:
             -o {output.orient}\\
             --untrimmed-output {output.noprimer}\\
             -j {threads}\\
-            {input.ccs}
+            {input.ccs} &>{log}
         """
 
 # quality filter the ccs and dereplicate
@@ -165,62 +180,89 @@ rule orient:
 # "n" gives the number of times the sequence appears.
 rule derep:
     output:
-        fasta="process/{seqrun}.ccs.derep.fasta",
-        fastq="process/{seqrun}.ccs.orient.fastq.gz",
-        trimmed="process/{seqrun}.ccs.trimmed.fastq.gz",
-        tooshort="process/{seqrun}.ccs.orient.tooshort.fastq.gz",
-        toolong="process/{seqrun}.ccs.orient.toolong.fastq.gz",
-        toopoor="process/{seqrun}.ccs.orient.toopoor.fastq.gz",
-        uc="process/{seqrun}.ccs.derep.uc"
+        derep="process/{seqrun}/derep/{seqrun}.fasta",
+        orient="process/{seqrun}/orient/{seqrun}.fastq.gz",
+        trimmed="process/{seqrun}/trimmed/{seqrun}.fastq.gz",
+        filtered="process/{seqrun}/filtered/{seqrun}.fastq.gz",
+        tooshort="process/{seqrun}/lost/tooshort/{seqrun}.fastq.gz",
+        toolong="process/{seqrun}/lost/toolong/{seqrun}.fastq.gz",
+        toopoor="process/{seqrun}/lost/toopoor/{seqrun}.fastq.gz",
+        uc="process/{seqrun}/derep/{seqrun}.uc"
     input:
-        lambda wildcards: expand("process/{seqrun}_{movie}.ccs.orient.fastq.gz",
+        lambda wildcards: expand("process/{seqrun}/ccs/{movie}.fastq.gz",
                                  seqrun = wildcards.seqrun,
                                  movie = movies[wildcards.seqrun])
+    params:
+        derepdir = "process/{seqrun}/derep/",
+        trimmeddir = "process/{seqrun}/trimmed/",
+        filtereddir = "process/{seqrun}/filtered/",
+        tooshortdir= "process/{seqrun}/lost/tooshort/",
+        toolongdir= "process/{seqrun}/lost/toolong/",
+        toopoordir= "process/{seqrun}/lost/toopoor/"
     resources:
         walltime=10
     shadow: "shallow"
     threads: 2
-    log: "logs/derep_{seqrun}.log"
+    log:
+        derep = "logs/{seqrun}/derep.log",
+        trim = "logs/{seqrun}/trim.log",
+        qualfilter = "logs/{seqrun}/qualfilter.log",
+        maxlenfilter = "logs/{seqrun}/maxlenfilter.log",
+        minlenfilter = "logs/{seqrun}/minlenfilter.log"
     conda: "conda/orient.yaml"
     shell:
         """
-         fastq=$(mktemp --suffix .fastq) &&
+         [ -d {params.derepdir} ] || mkdir -p {params.derepdir}
+         [ -d {params.trimmeddir} ] || mkdir -p {params.trimmeddir}
+         [ -d {params.filtereddir} ] || mkdir -p {params.filtereddir}
+         [ -d {params.tooshortdir} ] || mkdir -p {params.tooshortdir}
+         [ -d {params.toolongdir} ] || mkdir -p {params.toolongdir}
+         [ -d {params.toopoordir} ] || mkdir -p {params.toopoordir}
+         trimmed=$(mktemp --suffix .fastq) &&
+         filtered=$(mktemp --suffix .fastq) &&
          tooshort=$(mktemp --suffix .fastq) &&
          toolong=$(mktemp --suffix .fastq) &&
          toopoor=$(mktemp --suffix .fastq) &&
-         trap 'rm ${{fastq}} ${{tooshort}} ${{toolong}} ${{toopoor}}' EXIT &&
-         cat {input} > {output.fastq} &&
+         trap 'rm ${{trimmed}} ${{filtered}} ${{tooshort}} ${{toolong}} ${{toopoor}}' EXIT &&
+         cat {input} > {output.orient} &&
          cutadapt \\
             -a "TCCGTAGGTGAACCTGC;e=0.15...CGAAGTTTCCCTCAGGA;required;e=0.15"\\
             -o -\\
             -j 1\\
-            {output.fastq} |
+            {output.orient}\\
+            2>{log.trim} |
          vsearch --fastq_filter - \\
             --threads 1 \\
             --fastq_maxee_rate 0.01 \\
             --fastq_qmax 93 \\
             --fastqout_discarded ${{toopoor}} \\
-            --fastqout - |
+            --fastqout - \\
+            2>{log.qualfilter} |
+         tee ${{trimmed}} |
          vsearch --fastq_filter - \\
             --threads 1 \\
             --fastq_qmax 93 \\
             --fastq_minlen 1000 \\
             --fastqout_discarded ${{tooshort}} \\
-            --fastqout - |
+            --fastqout - \\
+            2>{log.minlenfilter} |
          vsearch --fastq_filter - \\
             --threads 1 \\
             --fastq_qmax 93 \\
             --fastq_maxlen 2000 \\
             --fastqout_discarded ${{toolong}} \\
-            --fastqout ${{fastq}}\\
-            --fastaout - |
+            --fastqout ${{filtered}}\\
+            --fastaout - \\
+            2>{log.maxlenfilter} |
          vsearch --derep_fulllength - \\
             --threads 1 \\
             --sizeout \\
             --fasta_width 0\\
-            --output {output.fasta} \\
-            --uc {output.uc} &&
-         gzip -c ${{fastq}} >{output.trimmed} &&
+            --output {output.derep} \\
+            --uc {output.uc} \\
+            &>{log.derep} &&
+         gzip -c ${{trimmed}} >{output.trimmed} &&
+         gzip -c ${{filtered}} >{output.filtered} &&
          gzip -c ${{tooshort}} >{output.tooshort} &&
          gzip -c ${{toolong}} >{output.toolong} &&
          gzip -c ${{toopoor}} >{output.toopoor}

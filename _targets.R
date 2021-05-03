@@ -23,7 +23,11 @@ source("scripts/12_dada2.R")
 source("scripts/13_tzara.R")
 
 c(
-    lsux_targets,
-    dada2_targets,
-    tzara_targets
+    config_targets,
+    tar_map(
+        values = list(seqrun = seqruns),
+        lsux_targets,
+        dada2_targets,
+        tzara_targets
+    )
 )

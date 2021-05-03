@@ -7,21 +7,11 @@ lsux_targets <- list(
     trimmed_files = tar_files(
             trimmed_files,
             list.files(
-                path = "process",
-                pattern = ".*trimmed.fastq.gz",
+                path = file.path("process", seqrun, "trimmed"),
+                pattern = ".*\\.fastq\\.gz",
                 full.names = TRUE
             )
         ),
-
-    # get the path for the CM which is truncated at the LR5 primer site
-    # (included in LSUx)
-    cm_32S_trunc = tar_file(
-        cm_32S_trunc,
-        system.file(
-            file.path("extdata", "fungi_32S_LR5.cm"),
-            package = "LSUx"
-        )
-    ),
 
     # run LSUx on each input file
     positions = tar_fst_tbl(

@@ -6,20 +6,26 @@ dada2_targets <- c(
     tar_map(
         values = regions_meta,
         names = region_name,
-        tar_target(
+        tar_file(
             extracted,
-            tzara::extract_region(
-                seq = trimmed_files,
-                positions = positions,
-                region = start_region,
-                region2 = end_region
-            ),
-            pattern = map(trimmed_files, positions),
-            iteration = "list"
+            {
+                outfile <- file.path("process", seqrun, "regions", region_name, basename(trimmed_files))
+                outdir <- dirname(outfile)
+                if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+                tzara::extract_region(
+                    seq = trimmed_files,
+                    positions = positions,
+                    region = start_region,
+                    region2 = end_region,
+                    outfile = outfile
+                )
+                outfile
+            },
+            pattern = map(trimmed_files, positions)
         ),
         tar_target(
             dereplicated,
-            derep(extracted, qualityType = "FastqQuality", verbose = TRUE),
+            dada2::derepFastq(extracted, qualityType = "FastqQuality", verbose = TRUE),
             pattern = map(extracted),
             iteration = "list"
         ),
