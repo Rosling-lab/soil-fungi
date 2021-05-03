@@ -39,7 +39,7 @@ rule all:
         expand("process/{seqrun}/trimmed/{seqrun}.fastq.gz", seqrun = rs2_runs),
         "_targets.R",
         glob("scripts/*.R"),
-        makescript = "make.R"
+        makescript = "make.R",
         planscript = "_targets.R"
     output: touch(".finished")
     conda: "conda/soil-fungi.yaml"
