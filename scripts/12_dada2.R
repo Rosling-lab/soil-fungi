@@ -9,9 +9,9 @@ dada2_targets <- c(
         tar_file(
             extracted,
             {
-                outfile <- file.path("process", seqrun, "regions", region_name, basename(trimmed_files))
-                outdir <- dirname(outfile)
+                outdir <- file.path("process", seqrun, "regions", region_name)
                 if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+                outfile <- file.path(outdir, basename(trimmed_files))
                 tzara::extract_region(
                     seq = trimmed_files,
                     positions = positions,
@@ -23,10 +23,32 @@ dada2_targets <- c(
             },
             pattern = map(trimmed_files, positions)
         ),
+        tar_files(
+            filtered,
+            {
+                outdir <- file.path("process", seqrun, "filtered", region_name)
+                if (!dir.exists(outdir)) dir.create(outdir, recursive = TRUE)
+                outfile <- file.path(outdir, basename(extracted))
+                dada2::filterAndTrim(
+                    extracted,
+                    filt = outdir,
+                    truncQ = 0,
+                    maxLen = max_length,
+                    minLen = min_length,
+                    maxEE = 3,
+                    multithread = local_cpus()
+                )
+                outfile
+            }
+        ),
         tar_target(
             dereplicated,
-            dada2::derepFastq(extracted, qualityType = "FastqQuality", verbose = TRUE),
-            pattern = map(extracted),
+            dada2::derepFastq(
+                filtered,
+                qualityType = "FastqQuality",
+                verbose = TRUE
+            ),
+            pattern = map(filtered),
             iteration = "list"
         ),
         tar_target(
@@ -45,16 +67,13 @@ dada2_targets <- c(
                 # reduce the homopolymer gap penalty
                 HOMOPOLYMER_GAP_PENALTY = -1,
                 # increase the band size
-                BAND_SIZE = 64
-            ),
-            pattern = map(dereplicated, err),
-            iteration = "list"
+                BAND_SIZE = 64,
+                pool = TRUE
+            )
         ),
         tar_fst_tbl(
             dadamapping,
-            tzara::dadamap(dereplicated, dadaobj, trimmed_files),
-            pattern = map(dereplicated, dadaobj, trimmed_files),
-            iteration = "list"
+            tzara::dadamap(dereplicated, dadaobj, trimmed_files)
         )
     ),
     list(
@@ -75,9 +94,7 @@ dada2_targets <- c(
                 HOMOPOLYMER_GAP_PENALTY = -1,
                 # increase the band size
                 BAND_SIZE = 64
-            ),
-            pattern = map(dereplicated_full),
-            iteration = "list"
+            )
         )
     )
 )

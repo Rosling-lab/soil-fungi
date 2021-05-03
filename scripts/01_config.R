@@ -3,7 +3,8 @@
 # April 2021
 
 configdir <- "config"
-regions_meta <- readr::read_csv(file.path(configdir, "default.regions.csv"))
+regions_meta <- readr::read_csv(file.path(configdir, "default.regions.csv"),
+                                col_types = "ccclii")
 
 seqruns <- list.dirs("process", recursive = FALSE, full.names = FALSE)
 
