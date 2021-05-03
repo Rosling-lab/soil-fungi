@@ -2,24 +2,6 @@
 # Brendan Furneaux
 # April 2021
 
-# different regions to run DADA2 on
-# do DADA2 on the full-length sequences, but not singletons.
-# running it on 150k sequences and 20 cores timed out after 4 days.
-regions_meta <- tibble::tribble(
-    ~region_name,    ~start_region,     ~end_region, ~singletons,
-    "ITS1",          "ITS1",            "ITS1",      TRUE,
-    "5_8S",          "5_8S",            "5_8S",      TRUE,
-    "ITS2",          "ITS2",            "ITS2",      TRUE,
-    "LSU1",          "LSU1",            "LSU1",      TRUE,
-    "D1",            "V2",              "V2",        TRUE,
-    "LSU2",          "LSU2",            "LSU2",      TRUE,
-    "D2",            "V3",              "V3",        TRUE,
-    "LSU3",          "LSU3",            "LSU3",      TRUE,
-    "D3",            "V4",              "V4",        TRUE,
-    "LSU4",          "LSU4",            "LSU4",      TRUE,
-    "full",          "full",            "full"      FALSE
-)
-
 dada2_targets <- c(
     tar_map(
         values = regions_meta,
