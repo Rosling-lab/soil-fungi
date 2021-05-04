@@ -15,7 +15,7 @@ is_snakemake <- function() !interactive() && exists("snakemake")
 # if we're not running on the cluster, leave one cpu free.
 local_cpus <- function() {
     if (is_snakemake()) {
-        snakemake@threads
+        get("snakemake")@threads
     } else if (is_slurm()) {
         out <- as.integer(Sys.getenv("SLURM_JOB_CPUS_PER_NODE"))
         assertthat::assert_that(assertthat::is.count(out))
