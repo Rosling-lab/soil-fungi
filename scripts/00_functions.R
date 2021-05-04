@@ -75,6 +75,8 @@ do_dada <- function(derep, err, region, err_region, derepname = NULL, ...) {
     names(out) <- names(derep)
     # run dada2 on non-null entries only
     nullderep <- vapply(derep, is.null, TRUE)
-    out[!nullderep] <- dada2::dada(derep[!nullderep], err, ...)
+    dadaout <- dada2::dada(derep[!nullderep], err, ...)
+    if (methods::is(dadaout, "dada")) dadaout <- list(dadaout)
+    out[!nullderep] <- dadaout
     out
 }
