@@ -45,6 +45,7 @@ rule all:
         makescript = "make.R",
         planscript = "_targets.R"
     output: touch(".finished")
+    threads: maxthreads
     conda: "conda/soil-fungi.yaml"
     script: "make.R"
 
