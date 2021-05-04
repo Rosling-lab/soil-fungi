@@ -57,7 +57,7 @@ do_dada <- function(derep, err, region, err_region, derepname = NA, ...) {
     # then check if we have a valid dada object already, and don't refit.
     if (region == err_region) {
         if (methods::is(err, "dada")) {
-            out <- list(err)
+            return(list(err))
         } else if (is.list(err) &&
                    all(vapply(err, methods::is, TRUE, "dada") |
                        vapply(err, is.null, TRUE))) {
