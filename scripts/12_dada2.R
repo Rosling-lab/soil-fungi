@@ -58,6 +58,7 @@ dada2_targets <- c(
                 err,
                 region = region_name,
                 err_region = "full",
+                derepname = basename(filtered),
                 errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,

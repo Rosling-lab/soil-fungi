@@ -52,7 +52,7 @@ derep.QualityScaledXStringSet <- function(reads, n = 1e+06, verbose = FALSE, qua
 # always returns a list of dada objects,
 # handles NULL inputs,
 # doesn't re-fit if err is already a dada object from this region
-do_dada <- function(derep, err, region, err_region, derepname = NA, ...) {
+do_dada <- function(derep, err, region, err_region, derepname = NULL, ...) {
     # if our current region is the region that the error model was fit from,
     # then check if we have a valid dada object already, and don't refit.
     if (region == err_region) {
@@ -65,19 +65,16 @@ do_dada <- function(derep, err, region, err_region, derepname = NA, ...) {
         }
     }
     # if we have only a single derep object, then wrap it in a list
-    # and optionally name it.
     if (methods::is(derep, "derep")) {
         derep <- list(derep)
-        if (!is.na(derepname)) names(derep) <- derepname
     }
-    # find and remove any NULL derep objects.
-    oldnames <- names(derep)
+    # name the dereps if necessary
+    if (!is.null(derepname) && is.null(names(derep))) names(derep) <- derepname
+    # make an all-NULL output
+    out <- vector("list", length(derep))
+    names(out) <- names(derep)
+    # run dada2 on non-null entries only
     nullderep <- vapply(derep, is.null, TRUE)
-    derep <- derep[!nullderep]
-    # run dada2
-    out <- dada2::dada(derep, err, ...)
-    # put back NULLs
-    out <- out[oldnames]
-    names(out) <- oldnames
+    out[!nullderep] <- dada2::dada(derep[!nullderep], err, ...)
     out
 }
