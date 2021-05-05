@@ -80,8 +80,16 @@ dada2_targets <- c(
         ),
         tar_fst_tbl(
             dadamapping,
-            tzara::dadamap(dereplicated, dadaobj, filtered)
-        )
+            tzara::dadamap(
+                derep = dereplicated,
+                dada = dadaobj,
+                filename = filtered_files,
+                region = region_name,
+                sample = gsub(".fast[aq](.gz)?$", "", basename(filtered_files))
+            ),
+            iteration = "list"
+        ),
+        unlist = FALSE
     ),
     list(
         err = tar_target(
