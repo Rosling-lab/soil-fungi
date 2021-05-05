@@ -23,7 +23,7 @@ dada2_targets <- c(
             },
             pattern = map(trimmed_files, positions)
         ),
-        tar_files(
+        tar_target(
             filtered,
             {
                 outdir <- file.path("process", seqrun, "filtered", region_name)
@@ -41,14 +41,18 @@ dada2_targets <- c(
                 outfile
             }
         ),
+        tar_files(
+            filtered_files,
+            filtered
+        ),
         tar_target(
             dereplicated,
             dada2::derepFastq(
-                filtered,
+                filtered_files,
                 qualityType = "FastqQuality",
                 verbose = TRUE
             ),
-            pattern = map(filtered),
+            pattern = map(filtered_files),
             iteration = "list"
         ),
         tar_target(
@@ -58,7 +62,7 @@ dada2_targets <- c(
                 err,
                 region = region_name,
                 err_region = "full",
-                derepname = basename(filtered),
+                derepname = basename(filtered_files),
                 errorEstimationFunction = dada2::PacBioErrfun,
                 multithread = local_cpus(),
                 verbose = TRUE,
