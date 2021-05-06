@@ -80,3 +80,18 @@ do_dada <- function(derep, err, region, err_region, derepname = NULL, ...) {
     out[!nullderep] <- dadaout
     out
 }
+
+join_dadamaps <- function(..., key_region = "ITS2") {
+    key_region_q <- parse(text = key_region)
+    dplyr::bind_rows(...) %>%
+        dplyr::select(name, seq_id, region, derep_seq, dada_seq) %>%
+        dplyr::filter(region != key_region | !is.na(dada_seq)) %>%
+        dplyr::mutate(dada_seq = dplyr::coalesce(dada_seq, derep_seq)) %>%
+        dplyr::select(-derep_seq) %>%
+        tidyr::pivot_wider(names_from = region, values_from = dada_seq) %>%
+        dplyr::filter(!is.na(!!key_region_q)) %>%
+        dplyr::select(-seq_id) %>%
+        dplyr::group_by_all() %>%
+        dplyr::summarise(n_read = dplyr::n())
+
+}
